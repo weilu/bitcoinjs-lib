@@ -15,12 +15,13 @@ module.exports = {
   Util: require('./util'),
   TransactionIn: T.TransactionIn,
   TransactionOut: T.TransactionOut,
-  ECPointFp: require('./jsbn/ec').ECPointFp,
+  ECPointFp: require('./ec').ECPointFp,
   Wallet: require('./wallet'),
   network: require('./network'),
   ecdsa: require('./ecdsa'),
   HDWallet: require('./hdwallet.js'),
   base58: require('./base58'),
   base58check: require('./base58check'),
-  convert: require('./convert')
+  convert: require('./convert'),
+  sec: require('./sec')
 }

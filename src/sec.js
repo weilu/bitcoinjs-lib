@@ -1,9 +1,7 @@
 // Named EC curves
 
-// Requires ec.js, jsbn.js, and jsbn2.js
-
 var ECCurveFp = require('./ec');
-var BigInteger = require('./jsbn');
+var BigInteger = require('./bigi');
 
 // ----------------
 // X9ECParameters

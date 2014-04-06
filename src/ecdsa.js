@@ -1,9 +1,9 @@
-var sec = require('./jsbn/sec')
+var sec = require('./sec')
 var secureRandom = require('secure-random')
 var BigInteger = require('./bigi')
 var convert = require('./convert')
 var HmacSHA256 = require('crypto-js/hmac-sha256')
-var ECPointFp = require('./jsbn/ec').ECPointFp
+var ECPointFp = require('./ec').ECPointFp
 var ecparams = sec("secp256k1")
 var P_OVER_FOUR = null
 

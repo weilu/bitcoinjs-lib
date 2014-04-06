@@ -2,7 +2,7 @@
 // Ported loosely from BouncyCastle's Java EC code
 // Only Fp curves implemented for now
 
-var BigInteger = require('./jsbn'),
+var BigInteger = require('./bigi'),
     sec = require('./sec');
 
 // ----------------
@@ -369,12 +369,12 @@ ECPointFp.decodeFrom = function (ecparams, enc) {
   if (type == 4) {
     var xBa = enc.slice(1, 1 + dataLen/2),
         yBa = enc.slice(1 + dataLen/2, 1 + dataLen),
-        x = BigInteger.fromByteArrayUnsigned(xBa),
-        y = BigInteger.fromByteArrayUnsigned(yBa);
+        x = BigInteger.fromBuffer(xBa),
+        y = BigInteger.fromBuffer(yBa);
   }
   else {
     var xBa = enc.slice(1),
-        x = BigInteger.fromByteArrayUnsigned(xBa),
+        x = BigInteger.fromBuffer(xBa),
         p = ecparams.getQ(),
         xCubedPlus7 = x.multiply(x).multiply(x).add(new BigInteger('7')).mod(p),
         pPlus1Over4 = p.add(new BigInteger('1'))

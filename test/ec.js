@@ -1,5 +1,5 @@
 var assert = require('assert')
-var sec = require('../src/jsbn/sec')
+var sec = require('../').sec
 var ecdsa = require('../').ecdsa
 
 var ecparams = sec('secp256k1')
