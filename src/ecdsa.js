@@ -1,5 +1,5 @@
 var sec = require('./jsbn/sec')
-var rng = require('secure-random')
+var secureRandom = require('secure-random')
 var BigInteger = require('./jsbn/jsbn')
 var convert = require('./convert')
 var HmacSHA256 = require('crypto-js/hmac-sha256')
@@ -52,10 +52,14 @@ function deterministicGenerateK(hash,key) {
 }
 
 var ECDSA = {
-  getBigRandom: function (limit) {
-    return new BigInteger(limit.bitLength(), rng).
-      mod(limit.subtract(BigInteger.ONE)).
-      add(BigInteger.ONE)
+  getBigRandom: function (limit, rng) {
+    rng = rng || secureRandom
+
+    // random 32 bytes (256 bits)
+    var bytes = rng(32)
+    return BigInteger.fromByteArrayUnsigned(bytes)
+      .mod(limit.subtract(BigInteger.ONE))
+      .add(BigInteger.ONE)
   },
   sign: function (hash, priv) {
     var d = priv
