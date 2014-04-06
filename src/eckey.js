@@ -2,7 +2,7 @@ var Address = require('./address')
 var assert = require('assert')
 var convert = require('./convert')
 var base58check = require('./base58check')
-var BigInteger = require('./jsbn/jsbn')
+var BigInteger = require('./bigi')
 var ecdsa = require('./ecdsa')
 var ECPointFp = require('./jsbn/ec').ECPointFp
 var sec = require('./jsbn/sec')
@@ -24,7 +24,7 @@ var ECKey = function (input, compressed) {
 
 ECKey.prototype.import = function (input, compressed) {
   function has(li, v) { return li.indexOf(v) >= 0 }
-  function fromBin(x) { return BigInteger.fromByteArrayUnsigned(x) }
+  function fromBin(x) { return BigInteger.fromBuffer(x) }
 
   this.priv =
       input instanceof ECKey                   ? input.priv

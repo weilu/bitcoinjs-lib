@@ -1,6 +1,6 @@
 var sec = require('./jsbn/sec')
 var secureRandom = require('secure-random')
-var BigInteger = require('./jsbn/jsbn')
+var BigInteger = require('./bigi')
 var convert = require('./convert')
 var HmacSHA256 = require('crypto-js/hmac-sha256')
 var ECPointFp = require('./jsbn/ec').ECPointFp
@@ -57,14 +57,14 @@ var ECDSA = {
 
     // random 32 bytes (256 bits)
     var bytes = rng(32)
-    return BigInteger.fromByteArrayUnsigned(bytes)
+    return BigInteger.fromBuffer(bytes)
       .mod(limit.subtract(BigInteger.ONE))
       .add(BigInteger.ONE)
   },
   sign: function (hash, priv) {
     var d = priv
     var n = ecparams.getN()
-    var e = BigInteger.fromByteArrayUnsigned(hash)
+    var e = BigInteger.fromBuffer(hash)
 
     var k = deterministicGenerateK(hash,priv.toByteArrayUnsigned())
     var G = ecparams.getG()
@@ -97,7 +97,7 @@ var ECDSA = {
     } else {
       throw new Error("Invalid format for pubkey value, must be byte array or ECPointFp")
     }
-    var e = BigInteger.fromByteArrayUnsigned(hash)
+    var e = BigInteger.fromBuffer(hash)
 
     return ECDSA.verifyRaw(e, r, s, Q)
   },
@@ -187,8 +187,8 @@ var ECDSA = {
     //if (cursor != sig.length)
     //  throw new Error("Extra bytes in signature")
 
-    var r = BigInteger.fromByteArrayUnsigned(rBa)
-    var s = BigInteger.fromByteArrayUnsigned(sBa)
+    var r = BigInteger.fromBuffer(rBa)
+    var s = BigInteger.fromBuffer(sBa)
 
     return {r: r, s: s}
   },

@@ -3,7 +3,7 @@
 // Copyright (c) 2011 Google Inc
 // Ported to JavaScript by Stefan Thomas
 
-var BigInteger = require('./jsbn/jsbn')
+var BigInteger = require('./bigi')
 
 // FIXME: ? This is a Base58Check alphabet
 var alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
@@ -18,7 +18,7 @@ for (var i=0; i<alphabet.length; ++i) {
 // encode a byte array into a base58 encoded String
 // @return String
 function encode(buffer) {
-  var bi = BigInteger.fromByteArrayUnsigned(buffer)
+  var bi = BigInteger.fromBuffer(buffer)
   var chars = []
 
   while (bi.compareTo(base) >= 0) {

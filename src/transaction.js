@@ -1,4 +1,4 @@
-var BigInteger = require('./jsbn/jsbn')
+var BigInteger = require('./bigi')
 var Script = require('./script')
 var util = require('./util')
 var convert = require('./convert')

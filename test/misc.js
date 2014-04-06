@@ -32,11 +32,11 @@ it('Keys & Key Management', function () {
 it('Signing and Verifying', function () {
   var s1 = bitcoinjs.Key()
   var sig_a = s1.sign(BigInteger.ZERO)
-  assert.ok(sig_a, 'Sign null')
 
+  assert.ok(sig_a, 'Sign null')
   assert.ok(s1.verify(BigInteger.ZERO, sig_a))
 
-  var message = new BigInteger(1024, rng).toByteArrayUnsigned()
+  var message = BigInteger.fromBuffer(rng(1024)).toByteArrayUnsigned()
   var hash = sha256FromBytesToBytes(message)
   var sig_b = s1.sign(hash)
   assert.ok(sig_b, 'Sign random string')
