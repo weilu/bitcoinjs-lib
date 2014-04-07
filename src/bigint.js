@@ -1,4 +1,15 @@
-var BigInteger = require('bigint')
+var BigIntegerSuper = require('bigint')
+
+var constructor = BigIntegerSuper('0').constructor
+
+function BigInteger() {
+  var bigint = BigIntegerSuper.apply(this, arguments)
+  bigint.constructor = constructor
+  return bigint
+}
+
+BigInteger.prototype = constructor.prototype // unable to do proper extension because it's a native prototype
+BigInteger.fromBuffer = BigIntegerSuper.fromBuffer
 
 BigInteger.prototype.testBit = function(i){
   var mask = new Buffer(this.abs().toBuffer().length)
