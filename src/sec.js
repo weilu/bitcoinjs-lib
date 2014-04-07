@@ -1,7 +1,7 @@
 // Named EC curves
 
 var ECCurveFp = require('./ec');
-var BigInteger = require('./bigi');
+var BigInteger = require('./bigint');
 
 // ----------------
 // X9ECParameters

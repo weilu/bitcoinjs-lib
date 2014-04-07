@@ -3,16 +3,16 @@
 // Copyright (c) 2011 Google Inc
 // Ported to JavaScript by Stefan Thomas
 
-var BigInteger = require('./bigi')
+var BigInteger = require('./bigint')
 
 // FIXME: ? This is a Base58Check alphabet
 var alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
-var base = BigInteger.valueOf(58)
+var base = new BigInteger('58')
 
 var alphabetMap = {}
 for (var i=0; i<alphabet.length; ++i) {
   var chr = alphabet[i]
-  alphabetMap[chr] = BigInteger.valueOf(i)
+  alphabetMap[chr] = new BigInteger(i.toString())
 }
 
 // encode a byte array into a base58 encoded String
@@ -21,14 +21,14 @@ function encode(buffer) {
   var bi = BigInteger.fromBuffer(buffer)
   var chars = []
 
-  while (bi.compareTo(base) >= 0) {
+  while (bi.cmp(base) >= 0) {
     var mod = bi.mod(base)
-    bi = bi.subtract(mod).divide(base)
+    bi = bi.sub(mod).div(base)
 
-    chars.push(alphabet[mod.intValue()])
+    chars.push(alphabet[mod.toNumber()])
   }
 
-  chars.push(alphabet[bi.intValue()])
+  chars.push(alphabet[bi.toNumber()])
 
   // Convert leading zeros too.
   for (var i=0; i<buffer.length; i++) {
@@ -43,7 +43,7 @@ function encode(buffer) {
 // decode a base58 encoded String into a byte array
 // @return Array
 function decode(str) {
-  var num = BigInteger.valueOf(0)
+  var num = BigInteger.ZERO
 
   var leading_zero = 0
   var seen_other = false
@@ -57,7 +57,7 @@ function decode(str) {
       throw new Error('invalid base58 string: ' + str)
     }
 
-    num = num.multiply(base).add(bi)
+    num = num.mul(base).add(bi)
 
     if (chr === '1' && !seen_other) {
       ++leading_zero
@@ -66,14 +66,10 @@ function decode(str) {
     }
   }
 
-  var bytes = num.toByteArrayUnsigned()
+  var pad = new Buffer(leading_zero)
+  pad.fill(0)
 
-  // remove leading zeros
-  while (leading_zero-- > 0) {
-    bytes.unshift(0)
-  }
-
-  return new Buffer(bytes)
+  return Buffer.concat([pad, num.toBuffer()])
 }
 
 module.exports = {

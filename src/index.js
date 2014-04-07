@@ -7,7 +7,7 @@ module.exports = {
   ECKey: Key.ECKey,
   ECPubKey: Key.ECPubKey,
   Message: require('./message'),
-  BigInteger: require('./bigi'),
+  BigInteger: require('./bigint'),
   Crypto: require('crypto-js'), //should we expose this at all?
   Script: require('./script'),
   Opcode: require('./opcode'),

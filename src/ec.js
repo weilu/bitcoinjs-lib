@@ -2,8 +2,8 @@
 // Ported loosely from BouncyCastle's Java EC code
 // Only Fp curves implemented for now
 
-var BigInteger = require('./bigi'),
-    sec = require('./sec');
+var BigInteger = require('./bigint')
+var sec = require('./sec');
 
 // ----------------
 // ECFieldElementFp
@@ -17,7 +17,7 @@ function ECFieldElementFp(q,x) {
 
 function feFpEquals(other) {
     if(other == this) return true;
-    return (this.q.equals(other.q) && this.x.equals(other.x));
+    return (this.q.eq(other.q) && this.x.eq(other.x));
 }
 
 function feFpToBigInteger() {
@@ -25,7 +25,7 @@ function feFpToBigInteger() {
 }
 
 function feFpNegate() {
-    return new ECFieldElementFp(this.q, this.x.negate().mod(this.q));
+    return new ECFieldElementFp(this.q, this.x.neg().mod(this.q));
 }
 
 function feFpAdd(b) {
@@ -33,19 +33,19 @@ function feFpAdd(b) {
 }
 
 function feFpSubtract(b) {
-    return new ECFieldElementFp(this.q, this.x.subtract(b.toBigInteger()).mod(this.q));
+    return new ECFieldElementFp(this.q, this.x.sub(b.toBigInteger()).mod(this.q));
 }
 
 function feFpMultiply(b) {
-    return new ECFieldElementFp(this.q, this.x.multiply(b.toBigInteger()).mod(this.q));
+    return new ECFieldElementFp(this.q, this.x.mul(b.toBigInteger()).mod(this.q));
 }
 
 function feFpSquare() {
-    return new ECFieldElementFp(this.q, this.x.square().mod(this.q));
+    return new ECFieldElementFp(this.q, this.x.pow(2).mod(this.q));
 }
 
 function feFpDivide(b) {
-    return new ECFieldElementFp(this.q, this.x.multiply(b.toBigInteger().modInverse(this.q)).mod(this.q));
+    return new ECFieldElementFp(this.q, this.x.mul(b.toBigInteger().invertm(this.q)).mod(this.q));
 }
 
 ECFieldElementFp.prototype.equals = feFpEquals;
@@ -79,16 +79,16 @@ function ECPointFp(curve,x,y,z) {
 
 function pointFpGetX() {
     if(this.zinv == null) {
-      this.zinv = this.z.modInverse(this.curve.q);
+      this.zinv = this.z.invertm(this.curve.q);
     }
-    return this.curve.fromBigInteger(this.x.toBigInteger().multiply(this.zinv).mod(this.curve.q));
+    return this.curve.fromBigInteger(this.x.toBigInteger().mul(this.zinv).mod(this.curve.q));
 }
 
 function pointFpGetY() {
     if(this.zinv == null) {
-      this.zinv = this.z.modInverse(this.curve.q);
+      this.zinv = this.z.invertm(this.curve.q);
     }
-    return this.curve.fromBigInteger(this.y.toBigInteger().multiply(this.zinv).mod(this.curve.q));
+    return this.curve.fromBigInteger(this.y.toBigInteger().mul(this.zinv).mod(this.curve.q));
 }
 
 function pointFpEquals(other) {
@@ -97,16 +97,16 @@ function pointFpEquals(other) {
     if(other.isInfinity()) return this.isInfinity();
     var u, v;
     // u = Y2 * Z1 - Y1 * Z2
-    u = other.y.toBigInteger().multiply(this.z).subtract(this.y.toBigInteger().multiply(other.z)).mod(this.curve.q);
-    if(!u.equals(BigInteger.ZERO)) return false;
+    u = other.y.toBigInteger().mul(this.z).sub(this.y.toBigInteger().mul(other.z)).mod(this.curve.q);
+    if(!u.eq(BigInteger.ZERO)) return false;
     // v = X2 * Z1 - X1 * Z2
-    v = other.x.toBigInteger().multiply(this.z).subtract(this.x.toBigInteger().multiply(other.z)).mod(this.curve.q);
-    return v.equals(BigInteger.ZERO);
+    v = other.x.toBigInteger().mul(this.z).sub(this.x.toBigInteger().mul(other.z)).mod(this.curve.q);
+    return v.eq(BigInteger.ZERO);
 }
 
 function pointFpIsInfinity() {
     if((this.x == null) && (this.y == null)) return true;
-    return this.z.equals(BigInteger.ZERO) && !this.y.toBigInteger().equals(BigInteger.ZERO);
+    return this.z.eq(BigInteger.ZERO) && !this.y.toBigInteger().eq(BigInteger.ZERO);
 }
 
 function pointFpNegate() {
@@ -118,12 +118,12 @@ function pointFpAdd(b) {
     if(b.isInfinity()) return this;
 
     // u = Y2 * Z1 - Y1 * Z2
-    var u = b.y.toBigInteger().multiply(this.z).subtract(this.y.toBigInteger().multiply(b.z)).mod(this.curve.q);
+    var u = b.y.toBigInteger().mul(this.z).sub(this.y.toBigInteger().mul(b.z)).mod(this.curve.q);
     // v = X2 * Z1 - X1 * Z2
-    var v = b.x.toBigInteger().multiply(this.z).subtract(this.x.toBigInteger().multiply(b.z)).mod(this.curve.q);
+    var v = b.x.toBigInteger().mul(this.z).sub(this.x.toBigInteger().mul(b.z)).mod(this.curve.q);
 
-    if(BigInteger.ZERO.equals(v)) {
-        if(BigInteger.ZERO.equals(u)) {
+    if(BigInteger.ZERO.eq(v)) {
+        if(BigInteger.ZERO.eq(u)) {
             return this.twice(); // this == b, so double
         }
 	return this.curve.getInfinity(); // this = -b, so infinity
@@ -135,46 +135,46 @@ function pointFpAdd(b) {
     var x2 = b.x.toBigInteger();
     var y2 = b.y.toBigInteger();
 
-    var v2 = v.square();
-    var v3 = v2.multiply(v);
-    var x1v2 = x1.multiply(v2);
-    var zu2 = u.square().multiply(this.z);
+    var v2 = v.pow(2);
+    var v3 = v2.mul(v);
+    var x1v2 = x1.mul(v2);
+    var zu2 = u.pow(2).mul(this.z);
 
     // x3 = v * (z2 * (z1 * u^2 - 2 * x1 * v^2) - v^3)
-    var x3 = zu2.subtract(x1v2.shiftLeft(1)).multiply(b.z).subtract(v3).multiply(v).mod(this.curve.q);
+    var x3 = zu2.sub(x1v2.shiftLeft(1)).mul(b.z).sub(v3).mul(v).mod(this.curve.q);
     // y3 = z2 * (3 * x1 * u * v^2 - y1 * v^3 - z1 * u^3) + u * v^3
-    var y3 = x1v2.multiply(THREE).multiply(u).subtract(y1.multiply(v3)).subtract(zu2.multiply(u)).multiply(b.z).add(u.multiply(v3)).mod(this.curve.q);
+    var y3 = x1v2.mul(THREE).mul(u).sub(y1.mul(v3)).sub(zu2.mul(u)).mul(b.z).add(u.mul(v3)).mod(this.curve.q);
     // z3 = v^3 * z1 * z2
-    var z3 = v3.multiply(this.z).multiply(b.z).mod(this.curve.q);
+    var z3 = v3.mul(this.z).mul(b.z).mod(this.curve.q);
 
     return new ECPointFp(this.curve, this.curve.fromBigInteger(x3), this.curve.fromBigInteger(y3), z3);
 }
 
 function pointFpTwice() {
     if(this.isInfinity()) return this;
-    if(this.y.toBigInteger().signum() == 0) return this.curve.getInfinity();
+    if(this.y.toBigInteger().toString() === '0') return this.curve.getInfinity();
 
     // TODO: optimized handling of constants
     var THREE = new BigInteger("3");
     var x1 = this.x.toBigInteger();
     var y1 = this.y.toBigInteger();
 
-    var y1z1 = y1.multiply(this.z);
-    var y1sqz1 = y1z1.multiply(y1).mod(this.curve.q);
+    var y1z1 = y1.mul(this.z);
+    var y1sqz1 = y1z1.mul(y1).mod(this.curve.q);
     var a = this.curve.a.toBigInteger();
 
     // w = 3 * x1^2 + a * z1^2
-    var w = x1.square().multiply(THREE);
-    if(!BigInteger.ZERO.equals(a)) {
-      w = w.add(this.z.square().multiply(a));
+    var w = x1.pow(2).mul(THREE);
+    if(!BigInteger.ZERO.eq(a)) {
+      w = w.add(this.z.pow(2).mul(a));
     }
     w = w.mod(this.curve.q);
     // x3 = 2 * y1 * z1 * (w^2 - 8 * x1 * y1^2 * z1)
-    var x3 = w.square().subtract(x1.shiftLeft(3).multiply(y1sqz1)).shiftLeft(1).multiply(y1z1).mod(this.curve.q);
+    var x3 = w.pow(2).sub(x1.shiftLeft(3).mul(y1sqz1)).shiftLeft(1).mul(y1z1).mod(this.curve.q);
     // y3 = 4 * y1^2 * z1 * (3 * w * x1 - 2 * y1^2 * z1) - w^3
-    var y3 = w.multiply(THREE).multiply(x1).subtract(y1sqz1.shiftLeft(1)).shiftLeft(2).multiply(y1sqz1).subtract(w.square().multiply(w)).mod(this.curve.q);
+    var y3 = w.mul(THREE).mul(x1).sub(y1sqz1.shiftLeft(1)).shiftLeft(2).mul(y1sqz1).sub(w.pow(2).mul(w)).mod(this.curve.q);
     // z3 = 8 * (y1 * z1)^3
-    var z3 = y1z1.square().multiply(y1z1).shiftLeft(3).mod(this.curve.q);
+    var z3 = y1z1.pow(2).mul(y1z1).shiftLeft(3).mod(this.curve.q);
 
     return new ECPointFp(this.curve, this.curve.fromBigInteger(x3), this.curve.fromBigInteger(y3), z3);
 }
@@ -183,10 +183,10 @@ function pointFpTwice() {
 // TODO: modularize the multiplication algorithm
 function pointFpMultiply(k) {
     if(this.isInfinity()) return this;
-    if(k.signum() == 0) return this.curve.getInfinity();
+    if(k.toString() === '0') return this.curve.getInfinity();
 
     var e = k;
-    var h = e.multiply(new BigInteger("3"));
+    var h = e.mul(new BigInteger("3"));
 
     var neg = this.negate();
     var R = this;
@@ -272,7 +272,7 @@ function curveFpGetB() {
 
 function curveFpEquals(other) {
     if(other == this) return true;
-    return(this.q.equals(other.q) && this.a.equals(other.a) && this.b.equals(other.b));
+    return(this.q.eq(other.q) && this.a.equals(other.a) && this.b.equals(other.b));
 }
 
 function curveFpGetInfinity() {
@@ -343,7 +343,7 @@ ECPointFp.prototype.getEncoded = function (compressed) {
   var enc = integerToBytes(x, 32);
 
   if (compressed) {
-    if (y.isEven()) {
+    if (y.mod(2).toString() === '0') {
       // Compressed even pubkey
       // M = 02 || X
       enc.unshift(0x02);
@@ -376,12 +376,12 @@ ECPointFp.decodeFrom = function (ecparams, enc) {
     var xBa = enc.slice(1),
         x = BigInteger.fromBuffer(xBa),
         p = ecparams.getQ(),
-        xCubedPlus7 = x.multiply(x).multiply(x).add(new BigInteger('7')).mod(p),
-        pPlus1Over4 = p.add(new BigInteger('1'))
-                       .divide(new BigInteger('4')),
-        y = xCubedPlus7.modPow(pPlus1Over4,p);
+        xCubedPlus7 = x.mul(x).mul(x).add(new BigInteger('7')).mod(p),
+        pPlus1Over4 = p.add(BigInteger.ONE)
+                       .div(new BigInteger('4')),
+        y = xCubedPlus7.powm(pPlus1Over4,p);
     if (y.mod(new BigInteger('2')).toString() != ''+(type % 2)) {
-        y = p.subtract(y)
+        y = p.sub(y)
     }
   }
 
@@ -420,14 +420,14 @@ ECPointFp.prototype.add2D = function (b) {
 
 ECPointFp.prototype.twice2D = function () {
   if (this.isInfinity()) return this;
-  if (this.y.toBigInteger().signum() == 0) {
+  if (this.y.toBigInteger().toString() === '0') {
     // if y1 == 0, then (x1, y1) == (x1, -y1)
     // and hence this = -this and thus 2(x1, y1) == infinity
     return this.curve.getInfinity();
   }
 
-  var TWO = this.curve.fromBigInteger(BigInteger.valueOf(2));
-  var THREE = this.curve.fromBigInteger(BigInteger.valueOf(3));
+  var TWO = this.curve.fromBigInteger(new BigInteger('2'));
+  var THREE = this.curve.fromBigInteger(new BigInteger('3'));
   var gamma = this.x.square().multiply(THREE).add(this.curve.a).divide(this.y.multiply(TWO));
 
   var x3 = gamma.square().subtract(this.x.multiply(TWO));
@@ -438,10 +438,10 @@ ECPointFp.prototype.twice2D = function () {
 
 ECPointFp.prototype.multiply2D = function (k) {
   if(this.isInfinity()) return this;
-  if(k.signum() == 0) return this.curve.getInfinity();
+  if(k.toString() === '0') return this.curve.getInfinity();
 
   var e = k;
-  var h = e.multiply(new BigInteger("3"));
+  var h = e.mul(new BigInteger("3"));
 
   var neg = this.negate();
   var R = this;
@@ -467,10 +467,10 @@ ECPointFp.prototype.isOnCurve = function () {
   var a = this.curve.getA().toBigInteger();
   var b = this.curve.getB().toBigInteger();
   var n = this.curve.getQ();
-  var lhs = y.multiply(y).mod(n);
-  var rhs = x.multiply(x).multiply(x)
-    .add(a.multiply(x)).add(b).mod(n);
-  return lhs.equals(rhs);
+  var lhs = y.mul(y).mod(n);
+  var rhs = x.mul(x).mul(x)
+    .add(a.mul(x)).add(b).mod(n);
+  return lhs.eq(rhs);
 };
 
 ECPointFp.prototype.toString = function () {
@@ -494,12 +494,12 @@ ECPointFp.prototype.validate = function () {
   // Check coordinate bounds
   var x = this.getX().toBigInteger();
   var y = this.getY().toBigInteger();
-  if (x.compareTo(BigInteger.ONE) < 0 ||
-      x.compareTo(n.subtract(BigInteger.ONE)) > 0) {
+  if (x.cmp(BigInteger.ONE) < 0 ||
+      x.cmp(n.sub(BigInteger.ONE)) > 0) {
     throw new Error('x coordinate out of bounds');
   }
-  if (y.compareTo(BigInteger.ONE) < 0 ||
-      y.compareTo(n.subtract(BigInteger.ONE)) > 0) {
+  if (y.cmp(BigInteger.ONE) < 0 ||
+      y.cmp(n.sub(BigInteger.ONE)) > 0) {
     throw new Error('y coordinate out of bounds');
   }
 

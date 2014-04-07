@@ -1,6 +1,6 @@
 var sec = require('./sec')
 var secureRandom = require('secure-random')
-var BigInteger = require('./bigi')
+var BigInteger = require('./bigint')
 var convert = require('./convert')
 var HmacSHA256 = require('crypto-js/hmac-sha256')
 var ECPointFp = require('./ec').ECPointFp
@@ -48,7 +48,7 @@ function deterministicGenerateK(hash,key) {
   v = HmacSHA256(v,k)
   v = HmacSHA256(v,k)
   vArr = convert.wordArrayToBytes(v)
-  return BigInteger.fromByteArrayUnsigned(vArr)
+  return fromByteArrayUnsigned(vArr)
 }
 
 var ECDSA = {
@@ -58,7 +58,7 @@ var ECDSA = {
     // random 32 bytes (256 bits)
     var bytes = rng(32)
     return BigInteger.fromBuffer(bytes)
-      .mod(limit.subtract(BigInteger.ONE))
+      .mod(limit.sub(BigInteger.ONE))
       .add(BigInteger.ONE)
   },
   sign: function (hash, priv) {
@@ -71,7 +71,7 @@ var ECDSA = {
     var Q = G.multiply(k)
     var r = Q.getX().toBigInteger().mod(n)
 
-    var s = k.modInverse(n).multiply(e.add(d.multiply(r))).mod(n)
+    var s = k.invertm(n).mul(e.add(d.mul(r))).mod(n)
 
     return ECDSA.serializeSig(r, s)
   },
@@ -106,18 +106,18 @@ var ECDSA = {
     var n = ecparams.getN()
     var G = ecparams.getG()
 
-    if (r.compareTo(BigInteger.ONE) < 0 || r.compareTo(n) >= 0) {
+    if (r.cmp(BigInteger.ONE) < 0 || r.cmp(n) >= 0) {
       return false
     }
 
-    if (s.compareTo(BigInteger.ONE) < 0 || s.compareTo(n) >= 0) {
+    if (s.cmp(BigInteger.ONE) < 0 || s.cmp(n) >= 0) {
       return false
     }
 
-    var c = s.modInverse(n)
+    var c = s.invertm(n)
 
-    var u1 = e.multiply(c).mod(n)
-    var u2 = r.multiply(c).mod(n)
+    var u1 = e.mul(c).mod(n)
+    var u2 = r.mul(c).mod(n)
 
     // TODO(!!!): For some reason Shamir's trick isn't working with
     // signed message verification!? Probably an implementation
@@ -127,7 +127,7 @@ var ECDSA = {
 
     var v = point.getX().toBigInteger().mod(n)
 
-    return v.equals(r)
+    return v.eq(r)
   },
 
   /**
@@ -206,8 +206,8 @@ var ECDSA = {
     }
 
     var n = ecparams.getN()
-    var r = BigInteger.fromByteArrayUnsigned(sig.slice(1, 33)).mod(n)
-    var s = BigInteger.fromByteArrayUnsigned(sig.slice(33, 65)).mod(n)
+    var r = fromByteArrayUnsigned(sig.slice(1, 33)).mod(n)
+    var s = fromByteArrayUnsigned(sig.slice(33, 65)).mod(n)
 
     return {r: r, s: s, i: i}
   },
@@ -241,31 +241,31 @@ var ECDSA = {
 
     // We precalculate (p + 1) / 4 where p is if the field order
     if (!P_OVER_FOUR) {
-      P_OVER_FOUR = p.add(BigInteger.ONE).divide(BigInteger.valueOf(4))
+      P_OVER_FOUR = p.add(BigInteger.ONE).div(new BigInteger('4'))
     }
 
     // 1.1 Compute x
     var x = isSecondKey ? r.add(n) : r
 
     // 1.3 Convert x to point
-    var alpha = x.multiply(x).multiply(x).add(a.multiply(x)).add(b).mod(p)
-    var beta = alpha.modPow(P_OVER_FOUR, p)
+    var alpha = x.mul(x).mul(x).add(a.mul(x)).add(b).mod(p)
+    var beta = alpha.powm(P_OVER_FOUR, p)
 
     //    var xorOdd = beta.isEven() ? (i % 2) : ((i+1) % 2)
     // If beta is even, but y isn't or vice versa, then convert it,
     // otherwise we're done and y == beta.
-    var y = (beta.isEven() ? !isYEven : isYEven) ? beta : p.subtract(beta)
+    var y = (beta.mod(2).toString() === '0' ? !isYEven : isYEven) ? beta : p.sub(beta)
 
     // 1.4 Check that nR is at infinity
     var R = new ECPointFp(curve, curve.fromBigInteger(x), curve.fromBigInteger(y))
     R.validate()
 
     // 1.5 Compute e from M
-    var e = BigInteger.fromByteArrayUnsigned(hash)
-    var eNeg = BigInteger.ZERO.subtract(e).mod(n)
+    var e = fromByteArrayUnsigned(hash)
+    var eNeg = (BigInteger.ZERO).sub(e).mod(n)
 
     // 1.6 Compute Q = r^-1 (sR - eG)
-    var rInv = r.modInverse(n)
+    var rInv = r.invertm(n)
     var Q = implShamirsTrick(R, s, G, eNeg).multiply(rInv)
 
     Q.validate()
@@ -299,5 +299,23 @@ var ECDSA = {
     throw new Error("Unable to find valid recovery factor")
   }
 }
+
+/**
+ * Turns a byte array into a big integer.
+ *
+ * This function will interpret a byte array as a big integer in big
+ * endian notation and ignore leading zeros.
+ */
+fromByteArrayUnsigned = function(ba) {
+  if (!ba.length) {
+    return BigInteger.ZERO;
+  } else if (ba[0] & 0x80) {
+    // Prepend a zero so the BigInteger class doesn't mistake this
+    // for a negative integer.
+    return BigInteger.fromBuffer(new Buffer([0].concat(ba)));
+  } else {
+    return BigInteger.fromBuffer(new Buffer(ba));
+  }
+};
 
 module.exports = ECDSA
