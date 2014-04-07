@@ -25,10 +25,10 @@ function encode(buffer) {
     var mod = bi.mod(base)
     bi = bi.sub(mod).div(base)
 
-    chars.push(alphabet[mod.toNumber()])
+    chars.push(alphabet[parseInt(mod.toString())]) //TODO: remove bigint from here and add tests
   }
 
-  chars.push(alphabet[bi.toNumber()])
+  chars.push(alphabet[parseInt(bi.toString())]) //TODO: remove bigint from here and add tests
 
   // Convert leading zeros too.
   for (var i=0; i<buffer.length; i++) {
