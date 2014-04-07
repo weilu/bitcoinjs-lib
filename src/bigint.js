@@ -1,8 +1,11 @@
 var BigInteger = require('bigint')
-var convert = require('./convert')
 
 BigInteger.prototype.testBit = function(i){
-  return convert.bytesToBin(this.toByteArrayUnsigned()).split('').reverse()[i] === '1'
+  var mask = new Buffer(this.abs().toBuffer().length)
+  mask.fill(255)
+
+  var bits = this.and(BigInteger.fromBuffer(mask)).toString(2)
+  return bits.split('').reverse()[i] === '1'
 }
 
 BigInteger.prototype.toByteArrayUnsigned = function() {

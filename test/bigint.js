@@ -8,7 +8,8 @@ describe('BigInteger', function() {
       assertBits(new BigInteger('129'), '1000000100000000')
       assertBits(new BigInteger('128'), '0000000100000000')
       assertBits(new BigInteger('-128'), '00000001')
-      // assertBits(new BigInteger('-127'), '10000001') TODO: fix negative numbers
+      assertBits(new BigInteger('-127'), '10000001')
+      assertBits(new BigInteger('-314'), '0110001101111111')
     })
 
     function assertBits(bigint, bits){
