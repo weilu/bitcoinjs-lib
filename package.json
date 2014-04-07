@@ -43,7 +43,7 @@
   "dependencies": {
     "crypto-js": "3.1.2-3",
     "secure-random": "0.2.1",
-    "bigint-browserify": "0.0.2",
+    "bigint-browserify": "git://github.com/weilu/bigint-browserify.git",
     "bigint": "^0.4.2"
   },
   "browser": {
