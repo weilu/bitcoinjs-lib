@@ -1,7 +1,8 @@
 var BigInteger = require('bigint')
+var convert = require('./convert')
 
 BigInteger.prototype.testBit = function(i){
-  return this.toString(2).split('').reverse()[i] === '1'
+  return convert.bytesToBin(this.toByteArrayUnsigned()).split('').reverse()[i] === '1'
 }
 
 BigInteger.prototype.toByteArrayUnsigned = function() {
