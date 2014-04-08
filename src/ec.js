@@ -152,7 +152,7 @@ function pointFpAdd(b) {
 
 function pointFpTwice() {
     if(this.isInfinity()) return this;
-    if(this.y.toBigInteger().toString() === '0') return this.curve.getInfinity();
+    if(this.y.toBigInteger().eq(BigInteger.ZERO)) return this.curve.getInfinity();
 
     // TODO: optimized handling of constants
     var THREE = new BigInteger("3");
@@ -183,7 +183,7 @@ function pointFpTwice() {
 // TODO: modularize the multiplication algorithm
 function pointFpMultiply(k) {
     if(this.isInfinity()) return this;
-    if(k.toString() === '0') return this.curve.getInfinity();
+    if(k.eq(BigInteger.ZERO)) return this.curve.getInfinity();
 
     var e = k;
     var h = e.mul(new BigInteger("3"));
@@ -343,7 +343,7 @@ ECPointFp.prototype.getEncoded = function (compressed) {
   var enc = integerToBytes(x, 32);
 
   if (compressed) {
-    if (y.mod(2).toString() === '0') {
+    if (y.mod(2).eq(BigInteger.ZERO)) {
       // Compressed even pubkey
       // M = 02 || X
       enc.unshift(0x02);
@@ -420,7 +420,7 @@ ECPointFp.prototype.add2D = function (b) {
 
 ECPointFp.prototype.twice2D = function () {
   if (this.isInfinity()) return this;
-  if (this.y.toBigInteger().toString() === '0') {
+  if (this.y.toBigInteger().eq(BigInteger.ZERO)) {
     // if y1 == 0, then (x1, y1) == (x1, -y1)
     // and hence this = -this and thus 2(x1, y1) == infinity
     return this.curve.getInfinity();
@@ -438,7 +438,7 @@ ECPointFp.prototype.twice2D = function () {
 
 ECPointFp.prototype.multiply2D = function (k) {
   if(this.isInfinity()) return this;
-  if(k.toString() === '0') return this.curve.getInfinity();
+  if(k.eq(BigInteger.ZERO)) return this.curve.getInfinity();
 
   var e = k;
   var h = e.mul(new BigInteger("3"));

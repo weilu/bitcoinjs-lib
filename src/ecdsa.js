@@ -254,7 +254,7 @@ var ECDSA = {
     //    var xorOdd = beta.isEven() ? (i % 2) : ((i+1) % 2)
     // If beta is even, but y isn't or vice versa, then convert it,
     // otherwise we're done and y == beta.
-    var y = (beta.mod(2).toString() === '0' ? !isYEven : isYEven) ? beta : p.sub(beta)
+    var y = (beta.mod(2).eq(BigInteger.ZERO) ? !isYEven : isYEven) ? beta : p.sub(beta)
 
     // 1.4 Check that nR is at infinity
     var R = new ECPointFp(curve, curve.fromBigInteger(x), curve.fromBigInteger(y))
