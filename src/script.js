@@ -281,7 +281,7 @@ Script.prototype.writeOp = function(opcode) {
 Script.prototype.writeBytes = function(data) {
   // FIXME: Script module doesn't support buffers yet
   if (Buffer.isBuffer(data)) {
-    data = Array.prototype.map.bind(data, function(x) { return x })()
+    data = Array.prototype.slice.call(data, 0)
   }
 
   if (data.length < Opcode.map.OP_PUSHDATA1) {
