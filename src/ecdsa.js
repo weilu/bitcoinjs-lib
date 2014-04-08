@@ -17,14 +17,14 @@ function implShamirsTrick(P, k, Q, l) {
 
     R.z = BigInteger.ONE
 
-    if (k.testBit(i)) {
-      if (l.testBit(i)) {
+    if (k.isbitset(i)) {
+      if (l.isbitset(i)) {
         R = R.add2D(Z)
       } else {
         R = R.add2D(P)
       }
     } else {
-      if (l.testBit(i)) {
+      if (l.isbitset(i)) {
         R = R.add2D(Q)
       }
     }

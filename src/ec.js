@@ -195,8 +195,8 @@ function pointFpMultiply(k) {
     for(i = h.bitLength() - 2; i > 0; --i) {
 	R = R.twice();
 
-	var hBit = h.testBit(i);
-	var eBit = e.testBit(i);
+	var hBit = h.isbitset(i);
+	var eBit = e.isbitset(i);
 
 	if (hBit != eBit) {
 	    R = R.add(hBit ? this : neg);
@@ -218,8 +218,8 @@ function pointFpMultiplyTwo(j,x,k) {
   var both = this.add(x);
   while(i >= 0) {
     R = R.twice();
-    if(j.testBit(i)) {
-      if(k.testBit(i)) {
+    if(j.isbitset(i)) {
+      if(k.isbitset(i)) {
         R = R.add(both);
       }
       else {
@@ -227,7 +227,7 @@ function pointFpMultiplyTwo(j,x,k) {
       }
     }
     else {
-      if(k.testBit(i)) {
+      if(k.isbitset(i)) {
         R = R.add(x);
       }
     }
@@ -450,8 +450,8 @@ ECPointFp.prototype.multiply2D = function (k) {
   for (i = h.bitLength() - 2; i > 0; --i) {
     R = R.twice();
 
-    var hBit = h.testBit(i);
-    var eBit = e.testBit(i);
+    var hBit = h.isbitset(i);
+    var eBit = e.isbitset(i);
 
     if (hBit != eBit) {
       R = R.add2D(hBit ? this : neg);

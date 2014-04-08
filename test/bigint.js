@@ -2,7 +2,7 @@ var assert = require('assert')
 var BigInteger = require('../').BigInteger
 
 describe('BigInteger', function() {
-  describe('testBit', function() {
+  describe('isbitset', function() {
     it('returns true if the the bit at the given position is set', function() {
       assertBits(new BigInteger('120'), '00011110')
       assertBits(new BigInteger('129'), '1000000100000000')
@@ -14,7 +14,7 @@ describe('BigInteger', function() {
 
     function assertBits(bigint, bits){
       bits.split('').forEach(function(b, i){
-        var set = bigint.testBit(i)
+        var set = bigint.isbitset(i)
         assert.equal(set, b === '1')
       })
     }

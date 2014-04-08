@@ -1,4 +1,4 @@
-var BigIntegerSuper = require('bigint')
+var BigIntegerSuper = require('bignum')
 var convert = require('./convert')
 
 var constructor = BigIntegerSuper('0').constructor
@@ -15,14 +15,6 @@ BigInteger.prototype = constructor.prototype // unable to do proper extension be
 BigInteger.fromBuffer = function(buffer) {
   var arr = Array.prototype.slice.call(buffer, 0)
   return new BigInteger(convert.bytesToHex(arr), 16)
-}
-
-BigInteger.prototype.testBit = function(i){
-  var mask = new Buffer(this.abs().toBuffer().length)
-  mask.fill(255)
-
-  var bits = this.and(BigInteger.fromBuffer(mask)).toString(2)
-  return bits.split('').reverse()[i] === '1'
 }
 
 BigInteger.prototype.toByteArrayUnsigned = function() {
