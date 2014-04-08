@@ -1,4 +1,5 @@
 var BigIntegerSuper = require('bigint')
+var convert = require('./convert')
 
 var constructor = BigIntegerSuper('0').constructor
 
@@ -9,7 +10,12 @@ function BigInteger() {
 }
 
 BigInteger.prototype = constructor.prototype // unable to do proper extension because it's a native prototype
-BigInteger.fromBuffer = BigIntegerSuper.fromBuffer
+
+// Patch it up until we consistently passing buffer as arg (rather than array sometimes)
+BigInteger.fromBuffer = function(buffer) {
+  var arr = Array.prototype.slice.call(buffer, 0)
+  return new BigInteger(convert.bytesToHex(arr), 16)
+}
 
 BigInteger.prototype.testBit = function(i){
   var mask = new Buffer(this.abs().toBuffer().length)
